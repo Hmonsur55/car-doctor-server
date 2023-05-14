@@ -28,7 +28,8 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
       await client.connect();
       
-      const dataCollection = client.db("carDoctor").collection("services")
+    const dataCollection = client.db("carDoctor").collection("services");
+    const bookCollection = client.db("carDoctor").collection("booking")
   
       //   to get all data
 
@@ -43,11 +44,31 @@ async function run() {
           const id = req.params.id;
           const query = { _id: new ObjectId(id) }
            const options = {
-          projection: { title: 1, price: 1 },
+          projection: { title: 1, price: 1, img: 1 },
         };
           const result = await dataCollection.findOne(query, options)
           res.send(result);
       })
+    
+    // booking
+    // get all the data 
+    app.get('/bookings', async(req, res) => {
+      let query = {}
+      if (req.query?.email) {
+        query = {
+          email : req.query.email
+        }
+      }
+      const result = await bookCollection.find(query).toArray()
+      res.send(result);
+  })
+    
+    app.post('/bookings', async (req, res) => {
+      const booking = req.body
+      console.log(booking)
+      const result = await bookCollection.insertOne(booking);
+      res.send(result);
+    })
       
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
